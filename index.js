@@ -116,7 +116,7 @@ Media.sync({force:true}).then( ()=>{
   })
 });
 
-User.all().then(users => {
+User.all().then(users => { //Getting the Eror When Fetching
   console.log(users);
   })
 
