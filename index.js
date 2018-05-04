@@ -7,9 +7,7 @@ const sequelize = new Sequelize('interntask2', 'root', 'password', {
     host: 'localhost',
     port: 3306,
     dialect: 'mysql',
-     operatorsAliases: false,
-     define: {
-           schema: "core"}
+      operatorsAliases: false,
 });
 
 sequelize.authenticate()
@@ -20,19 +18,8 @@ sequelize.authenticate()
 			console.log('Unable to connect to the database:', err);
 		});
 
-  const User=sequelize.define('userintern',{
-    pid:{
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    address_id :{
-      type: Sequelize.INTEGER
-    },
-    media_id:{
-      type: Sequelize.INTEGER
-    },
-    name:{
+  const User=sequelize.define('user',{
+   name:{
         type: Sequelize.STRING
     },
     email:{
@@ -41,30 +28,8 @@ sequelize.authenticate()
     mobile:{
         type: Sequelize.STRING
     },
-    pic_url:{
-        type: Sequelize.STRING
-    }
   });
-
-  User.sync({force: true}).then(() => {
-    console.log('Table Created');
-    return User.create({
-      pid: 1,
-      address_id: 1,
-      media_id:1,
-      name:'daksh',
-      email:'daksh@gmail.com',
-      mobile:'+91 7024918941',
-      pic_url:'www.ggogle.com'
-    });
-  });
-
-  const Address=sequelize.define('addressintern',{
-    address_id:{
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
-    },
+  const Address=sequelize.define('address',{
     street:{
       type:Sequelize.STRING
     },
@@ -76,49 +41,48 @@ sequelize.authenticate()
     },
     state:{
       type:Sequelize.STRING
-    }
+    },
   });
-
-  Address.sync({force:true}).then( ()=>{
-    console.log('Table Address Created');
-    return Address.create({
-      address_id:1,
-      street: 'Bhagwanpur',
-      city:'Muzaffarpur',
-      pincode:'842001',
-      state:'Bihar'
-    })
-  });
-const Media=sequelize.define('mediaintern',{
-  media_id:{
-    type:Sequelize.INTEGER,
-    primaryKey:true,
-    autoIncrement:true
-  },
+const Media=sequelize.define('media',{
   filename:{
-    type:Sequelize.INTEGER
+    type:Sequelize.STRING
   },
   size:{
-    type:Sequelize.INTEGER
+    type:Sequelize.STRING
   },
   pic_url:{
-    type:Sequelize.INTEGER
-  }
+    type:Sequelize.STRING
+  },
 });
-Media.sync({force:true}).then( ()=>{
-  console.log('Table Media Created');
-  return Media.create({
-    address_id:1,
-    street: 'Bhagwanpur',
+User.belongsTo(Address)
+User.belongsTo(Media)
+Address.sync({force : true}).then ( ()=>{
+  console.log('Table Address Created');
+  return Address.create({
+    street:'Bhagwanpur',
     city:'Muzaffarpur',
     pincode:'842001',
     state:'Bihar'
   })
 });
-
-User.all().then(users => { //Getting the Eror When Fetching
-  console.log(users);
+Media.sync({force: true}).then (() =>{
+  console.log('Table Media Created');
+  return Media.create({
+     filename:'abcjpeg',
+     size:'250',
+     pic_url:'abc.jpeg/dkbha'
   })
+});
+User.sync({force:true}).then(()=>{
+  console.log('Table User Create');
+  return User.create({
+    name: 'daksh',
+    email: 'email',
+    mobile: 'mobile',
+    pic_id:1,
+    address_id:1
+  });
+})
 
 
 app.get('/',(req,res)=>{
