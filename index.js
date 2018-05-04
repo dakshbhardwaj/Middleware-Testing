@@ -110,6 +110,9 @@ User.sync();
  // })
 app.post('/register',(req,res)=>{
 var{ name,email,mobile,street,city,pincode,filename,size,pic_url}=req.body;
+if (!email || !name || !mobile || !pincode || !filenam || !city || !street) {
+    return res.status(400).json('incorrect form submission');
+  }
 var hash=crypto.createHash('md5').update(name).digest('hex');
 if (filename == null || pic_url == null) {
   filename=`https://www.gravatar.com/avatar/${hash}`;
@@ -146,16 +149,22 @@ const url=`https://pincode.saratchandra.in/api/pincode/${pincode}`;
            res.send('Email Address or mobile no already exist')});
         })
        })
-}).then(function (result) {
-     res.send(result)
-}).catch(function (err) {
-  console.log(err);
-});
-});
+   }).then(function (result) {
+       res.send(result)
+   }).catch(function (err) {
+       console.log(err);
+   });
+  });
      })
      .catch(error =>{
        console.log(err);
      });
+})
+
+app.get('/userlist',(req,res) =>{
+  User.findAll().then(user =>{
+    res.send(user);
+  })
 })
 
 
