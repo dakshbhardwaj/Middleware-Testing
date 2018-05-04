@@ -110,11 +110,8 @@ User.sync();
  // })
 app.post('/register',(req,res)=>{
 var{ name,email,mobile,street,city,pincode,filename,size,pic_url}=req.body;
-if (!email || !name || !mobile || !pincode || !filenam || !city || !street) {
-    return res.status(400).json('incorrect form submission');
-  }
 var hash=crypto.createHash('md5').update(name).digest('hex');
-if (filename == null || pic_url == null) {
+if (filename === null || pic_url === null) {
   filename=`https://www.gravatar.com/avatar/${hash}`;
   pic_url=`https://www.gravatar.com/avatar/${hash}`;
 }
