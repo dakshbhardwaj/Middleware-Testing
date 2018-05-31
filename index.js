@@ -7,8 +7,39 @@ const cors = require('cors');
 require('events').EventEmitter.prototype._maxListeners = 100;
 
 const app=express();
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+
+
+function snakeCaseToCamelCase(data) {
+  if (typeof data != 'object') return data;
+    for (var oldKey in data) {
+      newKey = oldKey.replace(/(_\w)/g, function(item) {
+        return item[1].toUpperCase();
+      });
+      if (newKey != oldKey) {
+        if (data.hasOwnProperty(oldKey)) {
+          data[newKey] = data[oldKey];
+          delete data[oldKey];
+        }
+      }
+      if (typeof data[newKey] == 'object') {
+        data[newKey] = snakeCaseToCamelCase(data[newKey]);
+      }
+    }
+    return data;
+}
+
+app.use(function (req,res,next) {
+  req.body = snakeCaseToCamelCase(req.body);
+  next();
+})
+
+app.use(function (req,res,next) {
+    res.send("I am able to change the body");
+     next();
+});
 
 
 const sequelize = new Sequelize('interntask2', 'root', 'password', {
@@ -16,7 +47,6 @@ const sequelize = new Sequelize('interntask2', 'root', 'password', {
     port: 3306,
     dialect: 'mysql',
       operatorsAliases: false,
-
 });
 
 sequelize.authenticate()
@@ -78,36 +108,9 @@ const Media=sequelize.define('media',{
 User.belongsTo(Address);
 User.belongsTo(Media);
 Address.sync();
-// .then ( ()=>{
-//   console.log('Table Address Created');
-//   return Address.create({
-//     street:'Bhagwanpur',
-//     city:'Muzaffarpur',
-//     pincode:'842001',
-//     state:'Bihar'
-//   })
-// });
 Media.sync();
-// .then (() =>{
-//   console.log('Table Media Created');
-//   return Media.create({
-//      filename:'abcjpeg',
-//      size:'250',
-//      pic_url:'abc.jpeg/dkbha'
-//   })
-// });
 User.sync();
-// .then(()=>{
-//   console.log('Table User Create');
-//   return User.create({
-//     name: 'daksh',
-//     email: 'email',
-//     mobile: 'mobile',
-//     pic_id:1,
-//     address_id:1
-//   });
 
- // })
 app.post('/register',(req,res)=>{
 var{ name,email,mobile,street,city,pincode,filename,size,pic_url}=req.body;
 var hash=crypto.createHash('md5').update(name).digest('hex');
@@ -123,7 +126,7 @@ const url=`https://pincode.saratchandra.in/api/pincode/${pincode}`;
              res.send('Pincode does not exist');
              return;
          }
-         var state=json.data[0].state_name;
+      var state=json.data[0].state_name;
       return sequelize.transaction(function (t) {
         return Address.create({
                street:street,
@@ -164,6 +167,20 @@ app.get('/userlist',(req,res) =>{
   })
 })
 
+app.post('/deleteuser/:id',(req,res)=>{
+  var id=req.body;
+
+
+  // User.destroy({
+  //   where:{
+  //     id:id
+  //   }
+  // }).then(function (result) {
+  //    res.json(result+"User Deleted");
+  // },function (err) {
+  //   console.log(err);
+  // })
+})
 
 app.get('/',(req,res)=>{
   res.send('IT IS WORKING MAN');
