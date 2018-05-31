@@ -4,6 +4,7 @@ const crypto=require('crypto');
 const fetch = require('node-fetch');
 const bodyParser = require('body-parser')
 const cors = require('cors');
+var mung = require('express-mung');
 require('events').EventEmitter.prototype._maxListeners = 100;
 
 const app=express();
@@ -11,6 +12,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
+
+function lowertocamel(data)
+{
+return JSON.parse(JSON.stringify(data).replace(
+                /(_\w)\w+":/g,
+                match => match[1].toUpperCase() + match.substring(2)
+              ));
+}
+
+
+function camelCaseToSnakeCase(data) {
+  if (typeof data != 'object') return data;
+  for (var oldKey in data) {
+    newKey = oldKey.replace(/([A-Z])/g, function(item) {
+      return '_' + item.toLowerCase();
+    });
+    if (newKey != oldKey) {
+      if (data.hasOwnProperty(oldKey)) {
+        data[newKey] = data[oldKey];
+        delete data[oldKey];
+      }
+    }
+    if (typeof data[newKey] == 'object') {
+      data[newKey] = camelCaseToSnakeCase(data[newKey]);
+    }
+  }
+  return data;
+}
 
 function snakeCaseToCamelCase(data) {
   if (typeof data != 'object') return data;
@@ -36,10 +65,20 @@ app.use(function (req,res,next) {
   next();
 })
 
-app.use(function (req,res,next) {
-    res.send("I am able to change the body");
-     next();
-});
+
+app.use(mung.json(
+    function transform(body, req, res) {
+        body = camelCaseToSnakeCase((JSON.parse(JSON.stringify(body))));
+        return body;
+    }
+));
+
+
+// app.use(function (req,res,next){
+//   console.log("I Am herw");
+//   next();
+//   res.end();
+// });
 
 
 const sequelize = new Sequelize('interntask2', 'root', 'password', {
@@ -131,11 +170,11 @@ const url=`https://pincode.saratchandra.in/api/pincode/${pincode}`;
         return Address.create({
                street:street,
                city:city,
-               pincode:pincode,
+               pin_code:pincode,
                state:state
           },{transaction: t}).then(function (addrres) {
                return Media.create({
-               filename:filename,
+               file_name:filename,
                size:size,
                pic_url:pic_url
           }, {transaction: t}).then(function (mediares) {
@@ -161,7 +200,9 @@ const url=`https://pincode.saratchandra.in/api/pincode/${pincode}`;
      });
 })
 
-app.get('/userlist',(req,res) =>{
+
+
+app.get('/userlist',(req,res,next) =>{
   User.findAll().then(user =>{
     res.send(user);
   })
@@ -185,6 +226,8 @@ app.post('/deleteuser/:id',(req,res)=>{
 app.get('/',(req,res)=>{
   res.send('IT IS WORKING MAN');
 })
+
+
 
 app.listen(3001, ()=>{
   console.log('the app is running on port 3001');
