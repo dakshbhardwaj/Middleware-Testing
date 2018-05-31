@@ -13,14 +13,6 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-function lowertocamel(data)
-{
-return JSON.parse(JSON.stringify(data).replace(
-                /(_\w)\w+":/g,
-                match => match[1].toUpperCase() + match.substring(2)
-              ));
-}
-
 
 function camelCaseToSnakeCase(data) {
   if (typeof data != 'object') return data;
