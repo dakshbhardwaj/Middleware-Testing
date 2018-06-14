@@ -5,12 +5,74 @@ const fetch = require('node-fetch');
 const bodyParser = require('body-parser')
 const cors = require('cors');
 var mung = require('express-mung');
+var validator = require('is-my-json-valid');
+var Validator = require('jsonschema').Validator;
+  var v = new Validator();
+
+
 require('events').EventEmitter.prototype._maxListeners = 100;
 
 const app=express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+
+// var validate = validator({
+//   required: true,
+//   type: 'object',
+//   properties: {
+//     hello: {
+//       required: true,
+//       type: 'string'
+//     }
+//   }
+// })
+//
+// console.log('should be valid', validate({hello: 'world'}))
+// console.log('should not be valid', validate({}))
+//
+// console.log(validate.errors)
+
+var addressSchema = {
+   "id": "/SimpleAddress",
+   "type": "object",
+   "properties": {
+     "lines": {
+       "type": "array",
+       "items": {"type": "string"}
+     },
+     "zip": {"type": "string"},
+     "city": {"type": "string"},
+     "country": {"type": "string"}
+   },
+   "required": ["country"]
+ };
+
+ // Person
+ var schema = {
+   "id": "/SimplePerson",
+   "type": "object",
+   "properties": {
+     "name": {"type": "string"},
+     "address": {"$ref": "/SimpleAddress"},
+     "votes": {"type": "integer", "minimum": 1}
+   }
+ };
+
+ var p = {
+   "name": "Barack Obama",
+   "address": {
+     "lines": [ "1600 Pennsylvania Avenue Northwest" ],
+     "zip": "DC 20500",
+     "city": "Washington",
+     "country": "USA"
+   },
+   "votes": "lots"
+ };
+
+ v.addSchema(addressSchema, '/SimpleAddress');
+
+
 
 
 
