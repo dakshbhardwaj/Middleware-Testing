@@ -17,21 +17,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-// var validate = validator({
-//   required: true,
-//   type: 'object',
-//   properties: {
-//     hello: {
-//       required: true,
-//       type: 'string'
-//     }
-//   }
-// })
-//
-// console.log('should be valid', validate({hello: 'world'}))
-// console.log('should not be valid', validate({}))
-//
-// console.log(validate.errors)
+var validate = validator({
+  "id": "/SimplePerson",
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "address": {"$ref": "/SimpleAddress"},
+    "votes": {"type": "integer", "minimum": 1}
+}
+})
+
 
 var addressSchema = {
    "id": "/SimpleAddress",
@@ -71,7 +66,13 @@ var addressSchema = {
  };
 
  v.addSchema(addressSchema, '/SimpleAddress');
+ console.log('From the JSON SCHEMA',v.validate(p, schema));
 
+
+ console.log('FROM THE IS MY JSON VALID', validate(p));
+ console.log('FROM THE IS MY JSON VALID', validate({p}));
+
+ console.log(validate.errors)
 
 
 
